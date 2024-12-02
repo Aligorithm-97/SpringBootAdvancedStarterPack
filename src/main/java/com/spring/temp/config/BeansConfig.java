@@ -24,6 +24,8 @@ import java.util.Properties;
 public class BeansConfig {
 
     private final UserDetailsService userDetailService;
+    @Value("${spring.mail.mailUserName}")
+    private String passwordEmail;
     @Value("${spring.mail.mailPassword}")
     private String passwordMail;
 
@@ -50,7 +52,7 @@ public class BeansConfig {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("smtp.gmail.com");
         mailSender.setPort(587);
-        mailSender.setUsername("yourmail@gmail.com");
+        mailSender.setUsername(passwordEmail);
         mailSender.setPassword(passwordMail);
 
         Properties props = mailSender.getJavaMailProperties();
