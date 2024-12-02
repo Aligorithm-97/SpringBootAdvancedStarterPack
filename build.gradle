@@ -33,7 +33,8 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc' // You have to change it if you are using another database like postgres
+//	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc' // Sql server
+	runtimeOnly'org.postgresql:postgresql' // Postgres
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

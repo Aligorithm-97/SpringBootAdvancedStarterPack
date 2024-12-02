@@ -70,7 +70,7 @@ public class BeansConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(Arrays.asList("*")); // Enter your localhost port for development phase and if you want to deploy it then your domain or ip address for cors configuration
+        configuration.setAllowedOrigins(Arrays.asList("*")); // Enter your localhost port for development phase and if you want to deploy it then add your domain or ip address for cors configuration
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
