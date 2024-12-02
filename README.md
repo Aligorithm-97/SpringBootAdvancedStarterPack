@@ -13,8 +13,6 @@ for logging. Developers can quickly adapt this project with minimal configuratio
 - **PostgreSQL** or **SQL Server** installed for database support.
 - **Gmail** account for email integration.
 
-
-
 ---
 
 ## Step-by-Step Setup Guide
@@ -64,7 +62,7 @@ for logging. Developers can quickly adapt this project with minimal configuratio
 6. **Activate User Accounts**
    - Add the URL of your UI for account activation in `application-dev.properties`:
      ```properties
-     app.ui.activation-url=http://<your-ui-url>/activate
+     application.mailing.frontend.activation-url=http://<your-ui-url>/activate
      ```
 
 7. **Troubleshooting**
@@ -105,3 +103,7 @@ for logging. Developers can quickly adapt this project with minimal configuratio
 6. **Environment Support**
    - Built with **Java 17**.
    - Uses **Gradle** for dependency management and build.
+
+---
+
+*Thank you for using this advanced starter pack. If you have any feedback or suggestions, feel free to contribute to the repository. Wishing you success in your development journey. Happy coding! 🚀*
