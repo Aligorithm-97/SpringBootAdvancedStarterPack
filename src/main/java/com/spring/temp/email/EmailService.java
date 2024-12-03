@@ -72,7 +72,7 @@ public class EmailService {
         Map<String, Object> properties = new HashMap<>();
         Context context = new Context();
         context.setVariables(properties);
-        helper.setFrom("ITTS");
+        helper.setFrom("yourOrganizationName");
         helper.setBcc(recipients);
         helper.setSubject(subject);
         String template = "<b>Hello ,</b> "
