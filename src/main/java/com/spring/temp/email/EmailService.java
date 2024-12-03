@@ -60,4 +60,28 @@ public class EmailService {
 
         mailSender.send(mimeMessage);
     }
+
+    @Async
+    public void sendEmailToRelatedUsers(
+            String[] recipients,
+            String subject,
+            String text
+    ) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MULTIPART_MODE_MIXED, UTF_8.name());
+        Map<String, Object> properties = new HashMap<>();
+        Context context = new Context();
+        context.setVariables(properties);
+        helper.setFrom("ITTS");
+        helper.setBcc(recipients);
+        helper.setSubject(subject);
+        String template = "<b>Hello ,</b> "
+                + "<br><br> "
+                + text
+                + "<br><br> Have a nice day!"
+                + "<br><br> Your website name : <a href='https://www.google.com/'>https://www.google.com/</a> ";
+        helper.setText(template, true);
+        mailSender.send(mimeMessage);
+    }
+
 }

@@ -33,6 +33,7 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	compileOnly 'org.projectlombok:lombok'
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
 //	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc' // Sql server
 	runtimeOnly'org.postgresql:postgresql' // Postgres
 	annotationProcessor 'org.projectlombok:lombok'
