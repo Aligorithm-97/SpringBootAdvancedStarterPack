@@ -3,24 +3,36 @@ package com.spring.temp.auth;
 import com.spring.temp.email.EmailService;
 import com.spring.temp.email.EmailTemplateName;
 import com.spring.temp.domain.repository.RoleRepository;
+import com.spring.temp.exception.SomethingWentWrongException;
+import com.spring.temp.exception.UserNotFoundException;
 import com.spring.temp.security.JwtService;
 import com.spring.temp.domain.model.Token;
 import com.spring.temp.domain.repository.TokenRepository;
 import com.spring.temp.domain.model.User;
 import com.spring.temp.domain.repository.UserRepository;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.WebUtils;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +51,8 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     private final JwtService jwtService;
+
+    private final UserDetailsService userDetailsService;
 
     @Value("${application.mailing.frontend.activation-url}")
     private String activationUrl;
@@ -99,7 +113,7 @@ public class AuthenticationService {
         return codeBuilder.toString();
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public ResponseEntity<AuthenticationResponse> authenticate(AuthenticationRequest request) {
         var auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -108,13 +122,30 @@ public class AuthenticationService {
         );
         var claims = new HashMap<String, Object>();
         var user = ((User) auth.getPrincipal());
-        claims.put("fullName",user.fullName());
-        claims.put("uid",user.getId());
-        var jwtToken = jwtService.generateToken(claims,user);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        claims.put("fullName", user.fullName());
+        claims.put("uid", user.getId());
+        var jwtToken = jwtService.generateToken(claims, user);
+        var jwtRefreshToken = jwtService.generateRefreshToken(claims, user);
+
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", jwtToken)
+                .maxAge(1800)
+                .sameSite("none")
+                .path("/")
+                .secure(true)
+                .build();
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", jwtRefreshToken)
+                .httpOnly(true)
+                .maxAge(3 * 60 * 60)
+                .sameSite("none")
+                .secure(true)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .body(AuthenticationResponse.builder().token(jwtToken).build());
     }
 
-    //@Transactional
     public void activateAccount(String token) throws MessagingException {
         Token savedToken = tokenRepository.findByToken(token).orElseThrow(()->new RuntimeException("Invalid Token"));
 
@@ -129,6 +160,37 @@ public class AuthenticationService {
         savedToken.setValidatedAt(LocalDateTime.now());
         tokenRepository.save(savedToken);
 
+    }
+
+    public AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        Cookie cookie = WebUtils.getCookie(request, "refreshToken");
+        if (cookie == null) {
+            throw new SomethingWentWrongException("Refresh token not found in cookies.");
+        }
+        String jwtRefreshToken = cookie.getValue();
+        if (jwtService.isTokenExpired(jwtRefreshToken)) {
+            throw new SomethingWentWrongException("Token expired.");
+        }
+        String userEmail = jwtService.extractUserName(jwtRefreshToken);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+        Optional<User> byEmail = userRepository.findByEmail(userEmail);
+        if (byEmail.isEmpty()) {
+            throw new UserNotFoundException("User not found!");
+        }
+        User user = byEmail.get();
+        boolean tokenValid = jwtService.isTokenValid(jwtRefreshToken, userDetails);
+        if (!tokenValid) {
+            throw new SomethingWentWrongException("The provided refresh token is invalid.");
+        }
+        var claims = new HashMap<String, Object>();
+        claims.put("fullName", user.fullName());
+        claims.put("uid", user.getId());
+        String generatedToken = jwtService.generateToken(claims, userDetails);
+        Cookie generatedTokenCookie = new Cookie("accessToken", generatedToken);
+        generatedTokenCookie.setPath("/");
+        generatedTokenCookie.setMaxAge(1800);
+        response.addCookie(generatedTokenCookie);
+        return AuthenticationResponse.builder().token(generatedToken).build();
     }
 
 

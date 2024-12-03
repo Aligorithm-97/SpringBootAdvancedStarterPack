@@ -1,6 +1,8 @@
 package com.spring.temp.auth;
 
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,7 +27,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody @Valid AuthenticationRequest request
     ){
-        return ResponseEntity.ok(service.authenticate(request));
+        return service.authenticate(request);
     }
 
     @GetMapping("/activate-account")
@@ -33,6 +35,11 @@ public class AuthenticationController {
             @RequestParam String token
     ) throws MessagingException {
         service.activateAccount(token);
+    }
+
+    @GetMapping("/refreshToken")
+    public ResponseEntity<AuthenticationResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        return ResponseEntity.ok(service.refreshToken(request, response));
     }
 
 }

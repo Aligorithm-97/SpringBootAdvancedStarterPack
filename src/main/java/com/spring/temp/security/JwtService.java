@@ -50,6 +50,10 @@ public class JwtService {
         return generateToken(new HashMap<>(),userDetails);
     }
 
+    public String generateRefreshToken(Map<String, Object> claims, UserDetails userDetails) {
+        return buildToken(claims, userDetails, jwtRefreshExpiration);
+    }
+
     public String generateToken(Map<String, Object> claims, UserDetails userDetails) {
         return buildToken(claims,userDetails,jwtExpiration);
     }
@@ -80,7 +84,7 @@ public class JwtService {
         return (userName.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
