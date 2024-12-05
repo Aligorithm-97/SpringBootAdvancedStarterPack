@@ -1,7 +1,7 @@
 # Spring Boot Advanced Starter Pack
 
 This repository serves as an advanced Spring Boot starter pack, designed to streamline development with pre-configured
-integrations for database connections, Spring Security with JWT, email services, and Aspect-Oriented Programming (AOP)
+integrations for database connections, Spring Security with JWT  (including refresh token mechanism), email services, and Aspect-Oriented Programming (AOP)
 for logging. Developers can quickly adapt this project with minimal configuration adjustments to meet their needs.
 
 ---
@@ -84,6 +84,10 @@ for logging. Developers can quickly adapt this project with minimal configuratio
 
 2. **Spring Security with JWT**
    - Includes **JSON Web Token (JWT)** authentication for securing APIs.
+   - **Supports Refresh Token Mechanism**:
+     - Enables seamless token renewal without requiring users to re-authenticate.
+     - Designed for use with front-end interceptors to manage token refresh automatically.
+     - Pre-configured endpoints for obtaining access and refresh tokens.
    - **CORS Configuration**:
       - Development: Allow origins like `localhost` and specific ports.
       - Production: Set allowed origins to your domain or IP in the `BeansConfig` class.
